@@ -26,7 +26,7 @@ class RegistrationAPIView(APIView):
 
     def post(self, request: Request) -> Response:
         """Return user response after a successful registration."""
-        user_request = request.data.get('user', {})
+        user_request = request.data
         serializer = self.serializer_class(data=user_request)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -40,7 +40,7 @@ class LoginAPIView(APIView):
 
     def post(self, request: Request) -> Response:
         """Return user after login."""
-        user = request.data.get('user', {})
+        user = request.data
 
         serializer = self.serializer_class(data=user)
         if not serializer.is_valid():
@@ -63,7 +63,7 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
     def update(self, request: Request, *args: dict[str, Any], **kwargs: dict[str, Any]) -> Response:
         """Return updated user."""
-        serializer_data = request.data.get('user', {})
+        serializer_data = request.data
 
         serializer = self.serializer_class(
             request.user, data=serializer_data, partial=True, context={'request': request}
