@@ -132,3 +132,22 @@ class LogoutSerializer(serializers.Serializer[User]):
 
         except TokenError as ex:
             raise exceptions.AuthenticationFailed(ex)
+
+class RegisterTOTPSerializer(serializers.ModelSerializer[User]):
+    has_otp = serializers.BooleanField()
+
+    class Meta:
+        model = User
+        fields = ['has_otp']
+    
+    def validate(self, attrs):
+        if self.context['request'].user.has_otp:
+            raise serializers.ValidationError('A device has already been registered')
+        self.has_otp = attrs['has_otp']
+        return attrs
+
+    def update(self, instance, validated_data):
+        # print(validated_data)
+        instance.has_otp = validated_data.get('has_otp', False)
+        instance.save()
+        return instance

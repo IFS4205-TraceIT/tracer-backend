@@ -24,6 +24,13 @@ SECRET_KEY = 'django-insecure-)e5@zd7c7-+2p)*@3*+(en-m8$gcnvq9_j#g*&1wscdc6hg37x
 if 'SECRET_KEY' in os.environ:
     SECRET_KEY = os.environ['SECRET_KEY']
 
+# Vault client connection and initialization settings.
+# See https://hvac.readthedocs.io/en/stable/source/hvac_v1.html#hvac.v1.Client.__init__
+VAULT_SETTINGS = {
+    'url': 'http://localhost:8200',
+    'token': 'dev-only-token'
+}
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

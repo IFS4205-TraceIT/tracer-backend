@@ -72,10 +72,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         refresh = RefreshToken.for_user(self)
         return {'refresh': str(refresh), 'access': str(refresh.access_token)}
 
-    def get_full_name(self) -> Optional[str]:
-        """Return the full name of the user."""
-        return self.full_name
-
     def get_short_name(self) -> str:
         """Return user username."""
         return self.username

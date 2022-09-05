@@ -16,7 +16,10 @@ from .serializers import (
     LogoutSerializer,
     RegistrationSerializer,
     UserSerializer,
+    RegisterTOTPSerializer
 )
+from .vault import create_vault_client
+from .vault.totp import TOTP
 
 
 class RegistrationAPIView(APIView):
@@ -86,3 +89,23 @@ class LogoutAPIView(APIView):
         serializer.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RegisterTOTPView(APIView):
+    serializer_class = RegisterTOTPSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request: Request) -> Response:
+        """Validate token and save."""
+        serializer = self.serializer_class(request.user, data={'has_otp': True}, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        vault = create_vault_client()
+        totp = TOTP(vault)
+
+        img = totp.create_key(generate=True, name=request.user.id, issuer='TraceIT', account_name=request.user.username)
+
+        serializer.save()
+
+        return Response(img['data'], status=status.HTTP_200_OK)
