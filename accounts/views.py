@@ -8,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import User
 from .renderers import UserJSONRenderer
@@ -16,7 +17,8 @@ from .serializers import (
     LogoutSerializer,
     RegistrationSerializer,
     UserSerializer,
-    RegisterTOTPSerializer
+    RegisterTOTPSerializer,
+    ValidateTOTPSerializer
 )
 from .vault import create_vault_client
 from .vault.totp import TOTP
@@ -109,3 +111,13 @@ class RegisterTOTPView(APIView):
         serializer.save()
 
         return Response(img['data'], status=status.HTTP_200_OK)
+
+class ValidateTOTPView(TokenObtainPairView):
+    serializer_class = ValidateTOTPSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request: Request) -> Response:
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

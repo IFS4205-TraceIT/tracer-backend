@@ -1,9 +1,12 @@
 from django.contrib.auth import authenticate
 from rest_framework import exceptions, serializers
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from hvac.exceptions import InvalidRequest
 
 from .models import User
 from .utils import validate_email as email_is_valid
+from .vault import create_vault_client
+from .vault.totp import TOTP
 
 
 class RegistrationSerializer(serializers.ModelSerializer[User]):
@@ -47,6 +50,7 @@ class RegistrationSerializer(serializers.ModelSerializer[User]):
 class LoginSerializer(serializers.ModelSerializer[User]):
     username = serializers.CharField(max_length=255)
     email = serializers.CharField(max_length=255, read_only=True)
+    has_otp = serializers.BooleanField(read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
 
     tokens = serializers.SerializerMethodField()
@@ -93,9 +97,9 @@ class UserSerializer(serializers.ModelSerializer[User]):
             'username',
             'email',
             'password',
-            'phone_number'
+            'phone_number',
             'tokens',
-            'has_otp'
+            'has_otp',
             'is_staff',
         )
         read_only_fields = ('tokens', 'has_otp', 'is_staff')
@@ -133,6 +137,7 @@ class LogoutSerializer(serializers.Serializer[User]):
         except TokenError as ex:
             raise exceptions.AuthenticationFailed(ex)
 
+
 class RegisterTOTPSerializer(serializers.ModelSerializer[User]):
     has_otp = serializers.BooleanField()
 
@@ -151,3 +156,39 @@ class RegisterTOTPSerializer(serializers.ModelSerializer[User]):
         instance.has_otp = validated_data.get('has_otp', False)
         instance.save()
         return instance
+
+
+class ValidateTOTPSerializer(serializers.Serializer):
+    refresh = serializers.CharField(read_only=True)
+    access = serializers.CharField(read_only=True)
+    token = serializers.RegexField(regex=r'^\d{6}$', write_only=True)
+
+    @classmethod
+    def get_token(cls, user):
+        tk = RefreshToken.for_user(user)
+        tk['verified_otp'] = True
+        return {
+            'refresh': str(tk),
+            'access': str(tk.access_token),
+        }
+    
+    def validate(self, attrs):
+        token = attrs.get('token', None)
+        # Check if user has keyed a token
+        if token is None:
+            raise serializers.ValidationError('A token is required to log in.')
+        
+        # Check if the user has registered a TOTP device
+        if not self.context['request'].user.has_otp:
+            raise serializers.ValidationError('A TOTP device needs to be registered first.')
+
+        vault = create_vault_client()
+        totp = TOTP(vault)
+        try:
+            res = totp.validate_code(name=self.context['request'].user.id, code=token)
+            if 'data' not in res or 'valid' not in res['data'] or not res['data']['valid']:
+                raise serializers.ValidationError('Invalid token provided.')
+        except InvalidRequest:
+            raise serializers.ValidationError('Invalid token provided.')
+        
+        return self.get_token(self.context['request'].user)
