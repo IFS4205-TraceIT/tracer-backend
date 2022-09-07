@@ -13,7 +13,7 @@ class UserManager(BaseUserManager):  # type: ignore
     """UserManager class."""
 
     # type: ignore
-    def create_user(self, username: str, email: str, password: str = None) -> 'User':
+    def create_user(self, username: str, email: str, password: str = None) -> 'AuthUser':
         """Create and return a `User` with an email, username and password."""
         if username is None:
             raise TypeError('Users must have a username.')
@@ -30,7 +30,7 @@ class UserManager(BaseUserManager):  # type: ignore
 
         return user
 
-    def create_superuser(self, username: str, email: str, password: str) -> 'User':  # type: ignore
+    def create_superuser(self, username: str, email: str, password: str) -> 'AuthUser':  # type: ignore
         """Unused. Create and return a `User` with superuser (admin) permissions."""
 
         user = self.create_user(username, email, password)
@@ -42,7 +42,7 @@ class UserManager(BaseUserManager):  # type: ignore
         return user
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class AuthUser(AbstractBaseUser, PermissionsMixin):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(db_index=True, max_length=255, unique=True)
@@ -62,7 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     def __str__(self) -> str:
-        """Return a string representation of this `User`."""
+        """Return a string representation of this `AuthUser`."""
         string = self.username if self.username != '' else self.get_full_name()
         return f'{self.id} {string}'
 

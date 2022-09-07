@@ -3,19 +3,19 @@ from rest_framework import exceptions, serializers
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from hvac.exceptions import InvalidRequest
 
-from .models import User
+from .models import AuthUser
 from .utils import validate_email as email_is_valid
 from .vault import create_vault_client
 from .vault.totp import TOTP
 
 
-class RegistrationSerializer(serializers.ModelSerializer[User]):
+class RegistrationSerializer(serializers.ModelSerializer[AuthUser]):
     """Serializers registration requests and creates a new user."""
 
     password = serializers.CharField(max_length=128, min_length=8, write_only=True)
 
     class Meta:
-        model = User
+        model = AuthUser
         fields = [
             'username',
             'password',
@@ -39,7 +39,7 @@ class RegistrationSerializer(serializers.ModelSerializer[User]):
 
     def create(self, validated_data):  # type: ignore
         """Return user after creation."""
-        user = User.objects.create_user(
+        user = AuthUser.objects.create_user(
             username=validated_data['username'], email=validated_data['email'], password=validated_data['password']
         )
         user.phone_number = validated_data.get('phone_number', '')
@@ -47,7 +47,7 @@ class RegistrationSerializer(serializers.ModelSerializer[User]):
         return user
 
 
-class LoginSerializer(serializers.ModelSerializer[User]):
+class LoginSerializer(serializers.ModelSerializer[AuthUser]):
     username = serializers.CharField(max_length=255)
     email = serializers.CharField(max_length=255, read_only=True)
     has_otp = serializers.BooleanField(read_only=True)
@@ -57,12 +57,12 @@ class LoginSerializer(serializers.ModelSerializer[User]):
 
     def get_tokens(self, obj):  # type: ignore
         """Get user token."""
-        user = User.objects.get(username=obj.username)
+        user = AuthUser.objects.get(username=obj.username)
 
         return {'refresh': user.tokens['refresh'], 'access': user.tokens['access']}
 
     class Meta:
-        model = User
+        model = AuthUser
         fields = ['username', 'email', 'password', 'tokens']
 
     def validate(self, data):  # type: ignore
@@ -86,13 +86,13 @@ class LoginSerializer(serializers.ModelSerializer[User]):
         return user
 
 
-class UserSerializer(serializers.ModelSerializer[User]):
+class UserSerializer(serializers.ModelSerializer[AuthUser]):
     """Handle serialization and deserialization of User objects."""
 
     password = serializers.CharField(max_length=128, min_length=8, write_only=True)
 
     class Meta:
-        model = User
+        model = AuthUser
         fields = (
             'username',
             'email',
@@ -120,7 +120,7 @@ class UserSerializer(serializers.ModelSerializer[User]):
         return instance
 
 
-class LogoutSerializer(serializers.Serializer[User]):
+class LogoutSerializer(serializers.Serializer[AuthUser]):
     refresh = serializers.CharField()
 
     def validate(self, attrs):  # type: ignore
@@ -138,11 +138,11 @@ class LogoutSerializer(serializers.Serializer[User]):
             raise exceptions.AuthenticationFailed(ex)
 
 
-class RegisterTOTPSerializer(serializers.ModelSerializer[User]):
+class RegisterTOTPSerializer(serializers.ModelSerializer[AuthUser]):
     has_otp = serializers.BooleanField()
 
     class Meta:
-        model = User
+        model = AuthUser
         fields = ['has_otp']
     
     def validate(self, attrs):

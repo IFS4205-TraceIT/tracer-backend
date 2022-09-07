@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import User
+from .models import AuthUser
 from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer,

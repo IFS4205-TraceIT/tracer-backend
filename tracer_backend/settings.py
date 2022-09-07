@@ -93,7 +93,7 @@ DATABASES = {
 
 
 # DEFAULT USER MODEL
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.AuthUser'
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
