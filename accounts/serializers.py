@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import exceptions, serializers
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from hvac.exceptions import InvalidRequest
 
 from .models import AuthUser
@@ -63,7 +64,7 @@ class LoginSerializer(serializers.ModelSerializer[AuthUser]):
 
     class Meta:
         model = AuthUser
-        fields = ['username', 'email', 'password', 'tokens']
+        fields = ['username', 'email', 'has_otp', 'password', 'tokens']
 
     def validate(self, data):  # type: ignore
         """Validate and return user login."""
@@ -98,11 +99,10 @@ class UserSerializer(serializers.ModelSerializer[AuthUser]):
             'email',
             'password',
             'phone_number',
-            'tokens',
             'has_otp',
             'is_staff',
         )
-        read_only_fields = ('tokens', 'has_otp', 'is_staff')
+        read_only_fields = ('has_otp', 'is_staff')
 
     def update(self, instance, validated_data):  # type: ignore
         """Perform an update on a User."""
@@ -147,7 +147,7 @@ class RegisterTOTPSerializer(serializers.ModelSerializer[AuthUser]):
     
     def validate(self, attrs):
         if self.context['request'].user.has_otp:
-            raise serializers.ValidationError('A device has already been registered')
+            raise AuthenticationFailed('A TOTP device is already registered.', code='totp_device_registered')
         self.has_otp = attrs['has_otp']
         return attrs
 
@@ -161,7 +161,7 @@ class RegisterTOTPSerializer(serializers.ModelSerializer[AuthUser]):
 class ValidateTOTPSerializer(serializers.Serializer):
     refresh = serializers.CharField(read_only=True)
     access = serializers.CharField(read_only=True)
-    token = serializers.RegexField(regex=r'^\d{6}$', write_only=True)
+    totp = serializers.RegexField(regex=r'^\d{6}$', write_only=True)
 
     @classmethod
     def get_token(cls, user):
@@ -173,22 +173,24 @@ class ValidateTOTPSerializer(serializers.Serializer):
         }
     
     def validate(self, attrs):
-        token = attrs.get('token', None)
+        totp = attrs.get('totp', None)
         # Check if user has keyed a token
-        if token is None:
-            raise serializers.ValidationError('A token is required to log in.')
+        if totp is None:
+            raise AuthenticationFailed('The "totp" field is missing.', code='no_totp')
         
         # Check if the user has registered a TOTP device
         if not self.context['request'].user.has_otp:
-            raise serializers.ValidationError('A TOTP device needs to be registered first.')
+            raise AuthenticationFailed('A TOTP device needs to be registered first.', code='no_totp_device')
 
+        # Connect to Vault and verify TOTP value
         vault = create_vault_client()
-        totp = TOTP(vault)
+        totp_vault = TOTP(vault)
         try:
-            res = totp.validate_code(name=self.context['request'].user.id, code=token)
+            res = totp_vault.validate_code(name=self.context['request'].user.id, code=totp)
             if 'data' not in res or 'valid' not in res['data'] or not res['data']['valid']:
-                raise serializers.ValidationError('Invalid token provided.')
-        except InvalidRequest:
-            raise serializers.ValidationError('Invalid token provided.')
+                raise AuthenticationFailed('Invalid TOTP provided.', code='invalid_totp')
+        except InvalidRequest as e:
+            print(e)
+            raise AuthenticationFailed('An unexpected error occurred', code='totp_login_failed')
         
         return self.get_token(self.context['request'].user)

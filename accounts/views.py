@@ -49,7 +49,6 @@ class LoginAPIView(APIView):
 
         serializer = self.serializer_class(data=user)
         if not serializer.is_valid():
-            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -111,6 +110,7 @@ class RegisterTOTPView(APIView):
         serializer.save()
 
         return Response(img['data'], status=status.HTTP_200_OK)
+
 
 class ValidateTOTPView(TokenObtainPairView):
     serializer_class = ValidateTOTPSerializer
