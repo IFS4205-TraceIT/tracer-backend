@@ -46,7 +46,7 @@ class LoginAPIView(APIView):
         if not serializer.is_valid():
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
