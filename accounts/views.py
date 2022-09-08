@@ -8,15 +8,20 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import User
+from .models import AuthUser
 from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer,
     LogoutSerializer,
     RegistrationSerializer,
     UserSerializer,
+    RegisterTOTPSerializer,
+    ValidateTOTPSerializer
 )
+from .vault import create_vault_client
+from .vault.totp import TOTP
 
 
 class RegistrationAPIView(APIView):
@@ -44,7 +49,6 @@ class LoginAPIView(APIView):
 
         serializer = self.serializer_class(data=user)
         if not serializer.is_valid():
-            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         print(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -86,3 +90,34 @@ class LogoutAPIView(APIView):
         serializer.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RegisterTOTPView(APIView):
+    serializer_class = RegisterTOTPSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request: Request) -> Response:
+        """Validate token and save."""
+        serializer = self.serializer_class(request.user, data={'has_otp': True}, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        vault = create_vault_client()
+        totp = TOTP(vault)
+
+        img = totp.create_key(generate=True, name=request.user.id, issuer='TraceIT', account_name=request.user.username)
+
+        serializer.save()
+
+        return Response(img['data'], status=status.HTTP_200_OK)
+
+
+class ValidateTOTPView(TokenObtainPairView):
+    serializer_class = ValidateTOTPSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request: Request) -> Response:
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

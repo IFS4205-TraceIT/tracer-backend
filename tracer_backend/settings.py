@@ -24,6 +24,13 @@ SECRET_KEY = 'django-insecure-)e5@zd7c7-+2p)*@3*+(en-m8$gcnvq9_j#g*&1wscdc6hg37x
 if 'SECRET_KEY' in os.environ:
     SECRET_KEY = os.environ['SECRET_KEY']
 
+# Vault client connection and initialization settings.
+# See https://hvac.readthedocs.io/en/stable/source/hvac_v1.html#hvac.v1.Client.__init__
+VAULT_SETTINGS = {
+    'url': 'http://localhost:8200',
+    'token': 'dev-only-token'
+}
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -87,7 +94,7 @@ DATABASES = {
 
 
 # DEFAULT USER MODEL
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.AuthUser'
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
@@ -143,4 +150,11 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'accounts.exceptions.core_exception_handler',
     'NON_FIELD_ERRORS_KEY': 'error',
     'DEFAULT_AUTHENTICATION_CLASSES': ('accounts.authentication.TwoFactorAuthentication',),
+}
+
+# Simple JWT Settings
+# See https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+SIMPLE_JWT = {
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True
 }
