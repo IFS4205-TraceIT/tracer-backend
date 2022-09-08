@@ -7,10 +7,16 @@ from .models import (
 from rest_framework import exceptions, serializers 
 from datetime import date, timedelta
 
+class UserNotificationsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Notifications
+        fields = '__all__'
+
 class ListInfectedSerializer (serializers.ModelSerializer):
-    timestamp = serializers.DateTimeField(source="infectionhistory.recorded_timestamp")
     infected = serializers.BooleanField(default=True)
     infected_time = serializers.SlugRelatedField(source="infectionhistory", read_only=True, slug_field='recorded_timestamp')
+    notifications_set = UserNotificationsSerializer(many = True, read_only= True)
     class Meta:
         model = User
         fields = (
@@ -19,9 +25,9 @@ class ListInfectedSerializer (serializers.ModelSerializer):
             'name',
             'email',
             'phone',
-            'timestamp',
             'infected_time',
             'infected',
+            'notifications_set'
             )
 
 class CloseContactsSerializer (serializers.ModelSerializer):

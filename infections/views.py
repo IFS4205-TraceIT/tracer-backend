@@ -7,9 +7,10 @@ from .serializers import (
 )
 from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework.response import Response
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from rest_framework import status
 from django.http import Http404
+from rest_framework.exceptions import ValidationError
 
 #Remove later once auth and jwt is done
 import uuid
@@ -18,9 +19,22 @@ import uuid
 class ListInfectionAPIView(ListAPIView):
     serializer_class = ListInfectedSerializer
     model = serializer_class.Meta.model
+    lookup_url_kwarg = "date"
 
     def get_queryset(self):
-        queryset = self.model.objects.filter(infectionhistory__recorded_timestamp__gte=date.today()-timedelta(days=14))
+        querydate = self.kwargs.get(self.lookup_url_kwarg, None)
+        if querydate is None:
+            querydate = date.today()
+        else:
+            try:
+                querydate =  datetime.strptime(querydate,"%Y-%m-%d")
+            except ValueError:
+                raise ValidationError(detail="Invalid Date format, yyyy-mm-dd")
+
+        queryset = self.model.objects.filter(
+            infectionhistory__recorded_timestamp__lte=querydate,
+            infectionhistory__recorded_timestamp__gte=querydate-timedelta(days=14)
+            )
         return queryset
 
 class ListCloseContactAPIView(ListAPIView):
@@ -29,6 +43,7 @@ class ListCloseContactAPIView(ListAPIView):
     lookup_url_kwarg = "infectedId"
 
     def get_queryset(self):
+
         uid = self.kwargs.get(self.lookup_url_kwarg)
         closeContact = self.model.objects.filter(infected_user=uid)
         return closeContact
@@ -42,6 +57,7 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
             user = User.objects.get(id=pk)
         except:
             raise Http404
+
         try:
             return self.get_queryset().get(infected_user=user) 
         except Notifications.DoesNotExist:
@@ -50,9 +66,8 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
     def update(self, request, pk):
         contact_tracer_id = uuid.UUID("63a4d5b9-b061-4e30-9328-aabfaf865b02")
         cur_notification =  self.get_object(pk)
-        print(cur_notification)
+
         if cur_notification is None:
-            print("No object creating notification")
             serial = self.serializer_class(data= {
                 'infected_user': uuid.UUID(pk),
                 'tracer':contact_tracer_id,     
