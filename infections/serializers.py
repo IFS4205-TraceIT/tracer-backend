@@ -1,5 +1,5 @@
 from .models import (
-    UserInfo, 
+    User, 
     Closecontacts, 
     Infectionhistory,
     Notifications
@@ -12,7 +12,7 @@ class ListInfectedSerializer (serializers.ModelSerializer):
     infected = serializers.BooleanField(default=True)
     infected_time = serializers.SlugRelatedField(source="infectionhistory", read_only=True, slug_field='recorded_timestamp')
     class Meta:
-        model = UserInfo
+        model = User
         fields = (
             'id',
             'nric',

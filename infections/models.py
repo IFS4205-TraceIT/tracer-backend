@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 
-class UserInfo(models.Model):
+class User(models.Model):
     id = models.UUIDField(primary_key=True)
     nric = models.TextField(unique=True)
     name = models.TextField()
@@ -17,7 +17,7 @@ class UserInfo(models.Model):
 
 
 class Infectionhistory(models.Model):
-    user = models.OneToOneField('UserInfo', models.DO_NOTHING, primary_key=True)
+    user = models.OneToOneField(User, models.DO_NOTHING, primary_key=True)
     recorded_timestamp = models.DateTimeField()
 
     class Meta:
@@ -26,8 +26,8 @@ class Infectionhistory(models.Model):
 
 
 class Closecontacts(models.Model):
-    infected_user = models.OneToOneField('UserInfo', models.DO_NOTHING, primary_key=True, related_name="infected_user")
-    contacted_user = models.ForeignKey('UserInfo', models.DO_NOTHING, related_name="contacted_user")
+    infected_user = models.OneToOneField(User, models.DO_NOTHING, primary_key=True, related_name="infected_user")
+    contacted_user = models.ForeignKey(User, models.DO_NOTHING, related_name="contacted_user")
     contact_timestamp = models.DateTimeField()
     rssi = models.DecimalField(max_digits=65535, decimal_places=65535)
 
@@ -45,7 +45,7 @@ class Notifications(models.Model):
     due_date = models.DateField(blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
     tracer = models.ForeignKey(Contacttracers, models.DO_NOTHING, blank=True, null=True)
-    infected_user = models.ForeignKey('UserInfo', models.DO_NOTHING, blank=True, null=True)
+    infected_user = models.ForeignKey(User, models.DO_NOTHING, blank=True, null=True)
     status = models.BooleanField(blank=True, null=True)
 
     class Meta:

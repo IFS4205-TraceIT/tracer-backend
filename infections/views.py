@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import UserInfo, Notifications
+from .models import User, Notifications
 from .serializers import (
     ListInfectedSerializer, 
     CloseContactsSerializer,
@@ -39,7 +39,7 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
 
     def get_object(self, pk):
         try:
-            user = UserInfo.objects.get(id=pk)
+            user = User.objects.get(id=pk)
         except:
             raise Http404
         try:
