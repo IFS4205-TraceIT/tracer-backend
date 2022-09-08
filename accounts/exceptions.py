@@ -7,7 +7,7 @@ from rest_framework.views import exception_handler
 def core_exception_handler(exc: Exception, context: dict[str, Any]) -> Optional[Response]:
     """Error handler for the API."""
     response = exception_handler(exc, context)
-    handlers = {'ValidationError': _handle_generic_error}
+    handlers = {'ValidationError': _handle_generic_error, 'AuthenticationFailed': _handle_generic_error}
 
     exception_class = exc.__class__.__name__
 
