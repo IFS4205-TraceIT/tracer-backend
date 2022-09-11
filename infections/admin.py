@@ -1,13 +1,13 @@
 from django.contrib import admin
 
 from .models import (
-    User,
+    Users,
     Closecontacts,
     Infectionhistory,
     Notifications,
     Contacttracers
 )
 # Register your models here.
-@admin.register(User,Closecontacts,Infectionhistory,Notifications,Contacttracers)
+@admin.register(Users,Closecontacts,Infectionhistory,Notifications,Contacttracers)
 class InfectionAdmin(admin.ModelAdmin):
     pass

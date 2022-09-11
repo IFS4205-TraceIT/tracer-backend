@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import User, Notifications
+from .models import Users, Notifications
 from .serializers import (
     ListInfectedSerializer, 
     CloseContactsSerializer,
@@ -31,13 +31,21 @@ class ListInfectionAPIView(ListAPIView):
             except ValueError:
                 raise ValidationError(detail="Invalid Date format, yyyy-mm-dd")
 
-        queryset = self.model.objects.filter(
-            infectionhistory__recorded_timestamp__lte=querydate,
-            infectionhistory__recorded_timestamp__gte=querydate-timedelta(days=14)
-            )
+        querydate = querydate + timedelta(days=1)
+        queryset = self.model.objects.all() 
+        for user in queryset:
+            user.infections = user.infectionhistory_set.filter(
+            recorded_timestamp__range=(
+                querydate-timedelta(days=15),
+                querydate
+                )
+            ).latest("recorded_timestamp")
+            print(user.infections)
         return queryset
 
 class ListCloseContactAPIView(ListAPIView):
+
+    
     serializer_class = CloseContactsSerializer
     model = serializer_class.Meta.model
     lookup_url_kwarg = "infectedId"
@@ -54,29 +62,29 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
 
     def get_object(self, pk):
         try:
-            user = User.objects.get(id=pk)
+            cur_infection = Users.objects.get(id=pk).infectionhistory_set.latest("recorded_timestamp")
         except:
-            raise Http404
+            raise ValidationError(detail="Invalid User!")
 
         try:
-            return self.get_queryset().get(infected_user=user) 
+            return self.get_queryset().get(infection = cur_infection), cur_infection
         except Notifications.DoesNotExist:
-            return None
+            return None, cur_infection
 
     def update(self, request, pk):
         contact_tracer_id = uuid.UUID("63a4d5b9-b061-4e30-9328-aabfaf865b02")
-        cur_notification =  self.get_object(pk)
+        cur_notification, infection_id =  self.get_object(pk)
 
         if cur_notification is None:
-            serial = self.serializer_class(data= {
-                'infected_user': uuid.UUID(pk),
+            serial = self.serializer_class(data={
+                'infection': infection_id.id,
                 'tracer':contact_tracer_id,     
-                'status': True
+                'uploaded_status': False
             })
             serial.is_valid(raise_exception=True)
             serial.save()
         else:
-            serial = self.serializer_class(cur_notification, data = {'status': True}, partial=True)
+            serial = self.serializer_class(cur_notification, data = {'uploaded_status': False}, partial=True)
             serial.is_valid(raise_exception=True)
             serial.save()
 
