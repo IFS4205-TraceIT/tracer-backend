@@ -11,12 +11,15 @@ from datetime import date, timedelta, datetime
 from rest_framework import status
 from django.http import Http404
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 #Remove later once auth and jwt is done
 import uuid
 
 
 class ListInfectionAPIView(ListAPIView):
+    
+    permission_classes = (IsAuthenticated)
     serializer_class = ListInfectedSerializer
     model = serializer_class.Meta.model
     lookup_url_kwarg = "date"
@@ -45,7 +48,7 @@ class ListInfectionAPIView(ListAPIView):
 
 class ListCloseContactAPIView(ListAPIView):
 
-    
+    permission_classes = (IsAuthenticated)
     serializer_class = CloseContactsSerializer
     model = serializer_class.Meta.model
     lookup_url_kwarg = "infectedId"
@@ -57,6 +60,8 @@ class ListCloseContactAPIView(ListAPIView):
         return closeContact
 
 class UpdateUploadStatusAPIView(UpdateAPIView): 
+
+    permission_classes = (IsAuthenticated)
     queryset = Notifications.objects.all()
     serializer_class = UpdateUploadSerializer
 
@@ -72,7 +77,8 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
             return None, cur_infection
 
     def update(self, request, pk):
-        contact_tracer_id = uuid.UUID("63a4d5b9-b061-4e30-9328-aabfaf865b02")
+
+        contact_tracer_id = request.user.id
         cur_notification, infection_id =  self.get_object(pk)
 
         if cur_notification is None:
