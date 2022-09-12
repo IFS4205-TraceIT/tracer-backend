@@ -55,7 +55,7 @@ class AuthUser(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'phone']
+    REQUIRED_FIELDS = ['email', 'phone_number']
 
     # Tells Django that the UserManager class defined above should manage
     # objects of this type.

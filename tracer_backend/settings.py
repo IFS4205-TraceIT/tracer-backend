@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     'accounts.apps.AccountsConfig',
+    'infections.apps.InfectionsConfig'
 ]
 
 MIDDLEWARE = [
