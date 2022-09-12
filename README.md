@@ -15,6 +15,19 @@
 3. Installing dependencies:
     1. Install poetry on your machine: https://python-poetry.org/
     2. Run `poetry install` to install the required dependencies.
-5. Run `poetry run manage.py makemigrations` and `poetry run manage.py migrate` to migrate the database.
-6. Run `poetry run manage.py runserver` to start the server.
+4. Set and export the required environment variables:
+    ```bash
+    export DJANGO_SECRET_KEY="test" \
+        DJANGO_DEBUG="True" \
+        VAULT_ADDR="http://127.0.0.1:8200" \
+        VAULT_TOKEN="dev-only-token" \
+        POSTGRES_HOST="127.0.0.1" \
+        POSTGRES_PORT="5432" \
+        POSTGRES_DB="test" \
+        POSTGRES_USER="test" \
+        POSTGRES_PASSWORD="test"
+    ```
+
+5. Run `poetry run python manage.py makemigrations` and `poetry run python manage.py migrate` to migrate the database.
+6. Run `poetry run python manage.py runserver` to start the server.
 
