@@ -22,7 +22,7 @@ class InfectionHistorySerializer(serializers.ModelSerializer):
 
 class ListInfectedSerializer (serializers.ModelSerializer):
     infected = serializers.BooleanField(default=True)
-    infections = InfectionHistorySerializer()
+    infections = InfectionHistorySerializer(required=False)
     class Meta:
         model = Users
         fields = (

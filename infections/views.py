@@ -19,7 +19,7 @@ import uuid
 
 class ListInfectionAPIView(ListAPIView):
     
-    permission_classes = (IsAuthenticated)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ListInfectedSerializer
     model = serializer_class.Meta.model
     lookup_url_kwarg = "date"
@@ -37,18 +37,21 @@ class ListInfectionAPIView(ListAPIView):
         querydate = querydate + timedelta(days=1)
         queryset = self.model.objects.all() 
         for user in queryset:
-            user.infections = user.infectionhistory_set.filter(
-            recorded_timestamp__range=(
-                querydate-timedelta(days=15),
-                querydate
-                )
-            ).latest("recorded_timestamp")
-            print(user.infections)
+            infectedhistory = user.infectionhistory_set.filter(
+                recorded_timestamp__range=(
+                    querydate-timedelta(days=15),
+                    querydate
+                    ))
+            if len(infectedhistory) > 0:
+                user.infections = infectedhistory.latest("recorded_timestamp")
+            else:
+                user.infected = False
+            
         return queryset
 
 class ListCloseContactAPIView(ListAPIView):
 
-    permission_classes = (IsAuthenticated)
+    permission_classes = (IsAuthenticated,)
     serializer_class = CloseContactsSerializer
     model = serializer_class.Meta.model
     lookup_url_kwarg = "infectedId"
@@ -61,7 +64,7 @@ class ListCloseContactAPIView(ListAPIView):
 
 class UpdateUploadStatusAPIView(UpdateAPIView): 
 
-    permission_classes = (IsAuthenticated)
+    permission_classes = (IsAuthenticated,)
     queryset = Notifications.objects.all()
     serializer_class = UpdateUploadSerializer
 
