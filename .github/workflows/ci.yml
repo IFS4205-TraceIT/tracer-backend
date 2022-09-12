@@ -3,13 +3,9 @@ on: [push, pull_request]
 
 # Variables
 env:
-  POETRY_VERSION: '1.2.0'
-
-  POSTGRES_USER: 'test'
-  POSTGRES_PASSWORD: 'test'
-
-  ROOT_VAULT_TOKEN: 'dev-only-token'
-  VAULT_LISTEN_ADDR: '127.0.0.1:8200'
+  VAULT_ADDR: "http://vault:8200"
+  DJANGO_DEBUG: "True"
+  POETRY_VERSION: "1.2.0"
 
 jobs:
   tracer-backend-ci:
@@ -22,17 +18,25 @@ jobs:
       database:
         image: postgres
         env:
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        
+        options: >-
+          --health-cmd pg_isready 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
 
       vault:
         image: vault
         env:
-          VAULT_TOKEN: ${{ env.ROOT_VAULT_TOKEN }}
-          VAULT_DEV_ROOT_TOKEN_ID: ${{ env.ROOT_VAULT_TOKEN }}
+          # Used by the vault server
+          VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+          VAULT_DEV_ROOT_TOKEN_ID: ${{ secrets.VAULT_ROOT_TOKEN }}
 
-          VAULT_ADDR: "http://${{ env.VAULT_LISTEN_ADDR }}"
-          VAULT_DEV_LISTEN_ADDRESS: ${{ env.VAULT_LISTEN_ADDR }}
+          # Used by the installed vault client
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
 
     steps: 
       - name: Cleanup build folder
@@ -60,6 +64,18 @@ jobs:
           poetry config --local virtualenvs.options.no-setuptools true
           poetry config --local virtualenvs.options.no-pip true
           poetry install --no-interaction
+
+      - name: Migrate Database
+        run: |
+          poetry run python manage.py makemigrations
+          poetry run python manage.py migrate
+        env:
+          DJANGO_DEBUG: ${{ env.DJANGO_DEBUG }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
       
       - name: Run tests
         run: echo "Passed all tests!"
