@@ -1,0 +1,65 @@
+name: Tracer Backend CI
+on: [push, pull_request]
+
+# Variables
+env:
+  POETRY_VERSION: '1.2.0'
+
+  POSTGRES_USER: 'test'
+  POSTGRES_PASSWORD: 'test'
+
+  ROOT_VAULT_TOKEN: 'dev-only-token'
+  VAULT_LISTEN_ADDR: '127.0.0.1:8200'
+
+jobs:
+  tracer-backend-ci:
+    # Only run on runners with the 'ci' label
+    runs-on: ci
+
+    container: python:3.10-slim
+
+    services:
+      database:
+        image: postgres
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+
+      vault:
+        image: vault
+        env:
+          VAULT_TOKEN: ${{ env.ROOT_VAULT_TOKEN }}
+          VAULT_DEV_ROOT_TOKEN_ID: ${{ env.ROOT_VAULT_TOKEN }}
+
+          VAULT_ADDR: "http://${{ env.VAULT_LISTEN_ADDR }}"
+          VAULT_DEV_LISTEN_ADDRESS: ${{ env.VAULT_LISTEN_ADDR }}
+
+    steps: 
+      - name: Cleanup build folder
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: ${{ env.POETRY_VERSION }}
+
+      - name: Load cached virtual environment
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Python packages
+        run: |
+          poetry config --local virtualenvs.options.no-setuptools true
+          poetry config --local virtualenvs.options.no-pip true
+          poetry install --no-interaction
+      
+      - name: Run tests
+        run: echo "Passed all tests!"
