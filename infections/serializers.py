@@ -21,7 +21,6 @@ class InfectionHistorySerializer(serializers.ModelSerializer):
         depth = 2
 
 class ListInfectedSerializer (serializers.ModelSerializer):
-    infected = serializers.BooleanField(default=True)
     infections = InfectionHistorySerializer(required=False)
     class Meta:
         model = Users
@@ -31,7 +30,6 @@ class ListInfectedSerializer (serializers.ModelSerializer):
             'name',
             'email',
             'phone',
-            'infected',
             'infections'
             )
 

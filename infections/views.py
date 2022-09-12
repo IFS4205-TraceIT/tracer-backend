@@ -13,8 +13,6 @@ from django.http import Http404
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-#Remove later once auth and jwt is done
-import uuid
 
 
 class ListInfectionAPIView(ListAPIView):
@@ -35,18 +33,25 @@ class ListInfectionAPIView(ListAPIView):
                 raise ValidationError(detail="Invalid Date format, yyyy-mm-dd")
 
         querydate = querydate + timedelta(days=1)
-        queryset = self.model.objects.all() 
+        queryset = self.model.objects.all()
+        invalid = []
         for user in queryset:
             infectedhistory = user.infectionhistory_set.filter(
                 recorded_timestamp__range=(
                     querydate-timedelta(days=15),
                     querydate
                     ))
-            if len(infectedhistory) > 0:
-                user.infections = infectedhistory.latest("recorded_timestamp")
-            else:
-                user.infected = False
-            
+            if infectedhistory.count()  == 0:
+                invalid.append(user.id)
+        
+        queryset = self.model.objects.exclude(id__in=invalid)
+        for user in queryset:
+            user.infections = user.infectionhistory_set.filter(
+                recorded_timestamp__range=(
+                    querydate-timedelta(days=15),
+                    querydate
+                    )).latest("recorded_timestamp")
+
         return queryset
 
 class ListCloseContactAPIView(ListAPIView):
