@@ -62,9 +62,11 @@ class ListCloseContactAPIView(ListAPIView):
     lookup_url_kwarg = "infectedId"
 
     def get_queryset(self):
-
-        uid = self.kwargs.get(self.lookup_url_kwarg)
-        closeContact = self.model.objects.filter(infected_user=uid)
+        try:
+            uid = self.kwargs.get(self.lookup_url_kwarg)
+            closeContact = self.model.objects.filter(infected_user=uid)
+        except:
+            raise ValidationError(detail="Invalid User!")
         return closeContact
 
 class UpdateUploadStatusAPIView(UpdateAPIView): 
@@ -85,7 +87,6 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
             return None, cur_infection
 
     def update(self, request, pk):
-
         contact_tracer_id = request.user.id
         cur_notification, infection_id =  self.get_object(pk)
 

@@ -27,6 +27,7 @@ class ListInfectedSerializer (serializers.ModelSerializer):
         fields = (
             'id',
             'nric',
+
             'name',
             'email',
             'phone',
@@ -34,22 +35,24 @@ class ListInfectedSerializer (serializers.ModelSerializer):
             )
 
 class CloseContactsSerializer (serializers.ModelSerializer):
-    contacted_uid = serializers.UUIDField(source="contacted_user.id", read_only=True)
-    contacted_name = serializers.CharField(source="contacted_user.name", read_only=True)
-    contacted_phone = serializers.IntegerField(source="contacted_user.phone", read_only=True)
-    contacted_email = serializers.CharField(source="contacted_user.email", read_only=True)
-    contacted_gender = serializers.CharField(source="contacted_user.gender", read_only=True)
+    uid = serializers.UUIDField(source="contacted_user.id", read_only=True)
+    name = serializers.CharField(source="contacted_user.name", read_only=True)
+    phone = serializers.IntegerField(source="contacted_user.phone", read_only=True)
+    email = serializers.CharField(source="contacted_user.email", read_only=True)
+    gender = serializers.CharField(source="contacted_user.gender", read_only=True)
+    nric = serializers.CharField(source="contacted_user.nric", read_only=True)
 
     class Meta:
         model = Closecontacts
         fields = (
             'infected_user',
             'contact_timestamp',
-            'contacted_uid',
-            'contacted_name',
-            'contacted_phone',
-            'contacted_email',
-            'contacted_gender'
+            'uid',
+            'name',
+            'phone',
+            'email',
+            'gender',
+            'nric'
         )
 class UpdateUploadSerializer(serializers.ModelSerializer):
     due_date = serializers.DateField(default=date.today()+timedelta(days=7))
