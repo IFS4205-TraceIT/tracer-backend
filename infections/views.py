@@ -75,9 +75,9 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
     queryset = Notifications.objects.all()
     serializer_class = UpdateUploadSerializer
 
-    def get_object(self, pk):
+    def get_object(self, pk, infectionId):
         try:
-            cur_infection = Users.objects.get(id=pk).infectionhistory_set.latest("recorded_timestamp")
+            cur_infection = Users.objects.get(id=pk).infectionhistory_set.get(id=infectionId)
         except:
             raise ValidationError(detail="Invalid User!")
 
@@ -86,10 +86,10 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
         except Notifications.DoesNotExist:
             return None, cur_infection
 
-    def update(self, request, pk):
-        contact_tracer_id = request.user.id
-        cur_notification, infection_id =  self.get_object(pk)
+    def update(self, request, pk, infectionId):
 
+        contact_tracer_id = request.user.id
+        cur_notification, infection_id =  self.get_object(pk, infectionId)
         if cur_notification is None:
             serial = self.serializer_class(data={
                 'infection': infection_id.id,
