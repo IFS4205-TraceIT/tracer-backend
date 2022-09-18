@@ -20,19 +20,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)e5@zd7c7-+2p)*@3*+(en-m8$gcnvq9_j#g*&1wscdc6hg37x'
-if 'SECRET_KEY' in os.environ:
-    SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+
 
 # Vault client connection and initialization settings.
 # See https://hvac.readthedocs.io/en/stable/source/hvac_v1.html#hvac.v1.Client.__init__
 VAULT_SETTINGS = {
-    'url': 'http://localhost:8200',
-    'token': 'dev-only-token'
+    'url': os.environ['VAULT_ADDR'],
+    'token': os.environ['VAULT_TOKEN']
 }
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = (os.environ.get('DJANGO_DEBUG') == "True")
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
@@ -91,8 +90,12 @@ WSGI_APPLICATION = 'tracer_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'HOST': os.environ['POSTGRES_HOST'],
+        'PORT': os.environ['POSTGRES_PORT'],
+        'NAME': os.environ['POSTGRES_DB'],
+        'USER': os.environ['POSTGRES_USER'],
+        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
     }
 }
 
