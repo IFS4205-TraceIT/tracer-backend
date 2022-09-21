@@ -64,7 +64,8 @@ class ListCloseContactAPIView(ListAPIView):
     def get_queryset(self):
         try:
             uid = self.kwargs.get(self.lookup_url_kwarg)
-            closeContact = self.model.objects.filter(infected_user=uid)
+            infectionId = self.kwargs.get("infectionId")
+            closeContact = self.model.objects.filter(infected_user=uid,infectionhistory=infectionId)
         except:
             raise ValidationError(detail="Invalid User!")
         return closeContact
