@@ -13,8 +13,6 @@ from django.http import Http404
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-#Remove later once auth and jwt is done
-import uuid
 
 
 class ListInfectionAPIView(ListAPIView):
@@ -35,18 +33,25 @@ class ListInfectionAPIView(ListAPIView):
                 raise ValidationError(detail="Invalid Date format, yyyy-mm-dd")
 
         querydate = querydate + timedelta(days=1)
-        queryset = self.model.objects.all() 
+        queryset = self.model.objects.all()
+        invalid = []
         for user in queryset:
             infectedhistory = user.infectionhistory_set.filter(
                 recorded_timestamp__range=(
                     querydate-timedelta(days=15),
                     querydate
                     ))
-            if len(infectedhistory) > 0:
-                user.infections = infectedhistory.latest("recorded_timestamp")
-            else:
-                user.infected = False
-            
+            if infectedhistory.count()  == 0:
+                invalid.append(user.id)
+        
+        queryset = self.model.objects.exclude(id__in=invalid)
+        for user in queryset:
+            user.infections = user.infectionhistory_set.filter(
+                recorded_timestamp__range=(
+                    querydate-timedelta(days=15),
+                    querydate
+                    )).latest("recorded_timestamp")
+
         return queryset
 
 class ListCloseContactAPIView(ListAPIView):
@@ -57,9 +62,12 @@ class ListCloseContactAPIView(ListAPIView):
     lookup_url_kwarg = "infectedId"
 
     def get_queryset(self):
-
-        uid = self.kwargs.get(self.lookup_url_kwarg)
-        closeContact = self.model.objects.filter(infected_user=uid)
+        try:
+            uid = self.kwargs.get(self.lookup_url_kwarg)
+            infectionId = self.kwargs.get("infectionId")
+            closeContact = self.model.objects.filter(infected_user=uid,infectionhistory=infectionId)
+        except:
+            raise ValidationError(detail="Invalid User!")
         return closeContact
 
 class UpdateUploadStatusAPIView(UpdateAPIView): 
@@ -68,9 +76,9 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
     queryset = Notifications.objects.all()
     serializer_class = UpdateUploadSerializer
 
-    def get_object(self, pk):
+    def get_object(self, pk, infectionId):
         try:
-            cur_infection = Users.objects.get(id=pk).infectionhistory_set.latest("recorded_timestamp")
+            cur_infection = Users.objects.get(id=pk).infectionhistory_set.get(id=infectionId)
         except:
             raise ValidationError(detail="Invalid User!")
 
@@ -79,11 +87,10 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
         except Notifications.DoesNotExist:
             return None, cur_infection
 
-    def update(self, request, pk):
+    def update(self, request, pk, infectionId):
 
         contact_tracer_id = request.user.id
-        cur_notification, infection_id =  self.get_object(pk)
-
+        cur_notification, infection_id =  self.get_object(pk, infectionId)
         if cur_notification is None:
             serial = self.serializer_class(data={
                 'infection': infection_id.id,
