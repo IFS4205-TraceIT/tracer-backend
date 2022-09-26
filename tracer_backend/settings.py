@@ -27,7 +27,8 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # See https://hvac.readthedocs.io/en/stable/source/hvac_v1.html#hvac.v1.Client.__init__
 VAULT_SETTINGS = {
     'url': os.environ['VAULT_ADDR'],
-    'token': os.environ['VAULT_TOKEN']
+    'token': os.environ['VAULT_TOKEN'],
+    'verify': False
 }
 
 # SECURITY WARNING: don't run with debug turned on in production!
