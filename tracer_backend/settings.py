@@ -35,7 +35,7 @@ VAULT_SETTINGS = {
 DEBUG = (os.environ.get('DJANGO_DEBUG') == "True")
 
 
-ALLOWED_HOSTS = ['traceit-04-i.comp.nus.edu.sg'] if not DEBUG else []
+ALLOWED_HOSTS = ['traceit-04-i.comp.nus.edu.sg', '.localhost', '127.0.0.1', '[::1]'] if DEBUG else ['traceit-04-i.comp.nus.edu.sg']
 
 
 # Application definition
