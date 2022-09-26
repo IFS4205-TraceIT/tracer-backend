@@ -34,6 +34,7 @@ VAULT_SETTINGS = {
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (os.environ.get('DJANGO_DEBUG') == "True")
 
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 ALLOWED_HOSTS = ['traceit-04-i.comp.nus.edu.sg', '.localhost', '127.0.0.1', '[::1]'] if DEBUG else ['traceit-04-i.comp.nus.edu.sg']
 
