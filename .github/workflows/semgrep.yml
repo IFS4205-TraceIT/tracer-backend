@@ -10,7 +10,9 @@ on:
 jobs:
   semgrep:
     runs-on: ci
-    container: returntocorp/semgrep
+    container: 
+      image: returntocorp/semgrep
+      options: --dns 1.1.1.1
 
     steps:
 
