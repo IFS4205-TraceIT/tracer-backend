@@ -9,7 +9,6 @@ on:
 
 jobs:
   semgrep:
-    name: Semgrep Scan
     runs-on: ci
     container: returntocorp/semgrep
 
