@@ -103,4 +103,15 @@ jobs:
           VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
 
       - name: Run tests
-        run: echo "Passed all tests!"
+        run: |
+          poetry run python manage.py test
+        env:
+          DJANGO_DEBUG: ${{ env.DJANGO_DEBUG }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          POSTGRES_HOST: "database"
+          POSTGRES_PORT: "5432"
+          POSTGRES_DB: "traceit"
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
