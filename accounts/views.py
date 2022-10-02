@@ -10,6 +10,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from accounts.hooks import post_login_hook, post_registration_hook
+
 from .models import AuthUser
 from infections.models import Contacttracers
 from .renderers import UserJSONRenderer
@@ -36,10 +38,7 @@ class RegistrationAPIView(APIView):
         serializer = self.serializer_class(data=user_request)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        ct = Contacttracers(id=serializer.data['id'])
-        ct.save()
-        del serializer.data['id']
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return post_registration_hook(request, serializer)
 
 
 class LoginAPIView(APIView):
@@ -54,13 +53,7 @@ class LoginAPIView(APIView):
         serializer = self.serializer_class(data=user)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            Contacttracers.objects.get(id=serializer.data['id'])
-        except Contacttracers.DoesNotExist:
-            return Response(data={'user':{'error':['Invalid User']}}, status=status.HTTP_400_BAD_REQUEST)
-
-        del serializer.data['id']
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return post_login_hook(request, serializer)
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
