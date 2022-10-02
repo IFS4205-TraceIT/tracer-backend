@@ -54,7 +54,6 @@ class LoginAPIView(APIView):
         serializer = self.serializer_class(data=user)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        print(serializer.data)
         try:
             Contacttracers.objects.get(id=serializer.data['id'])
         except Contacttracers.DoesNotExist:
