@@ -6,6 +6,7 @@ env:
   VAULT_ADDR: "http://vault:8200"
   DJANGO_DEBUG: "True"
   POETRY_VERSION: "1.2.0"
+  VAULT_VERSION: "1.11.4"
 
 jobs:
   tracer-backend-ci:
@@ -80,6 +81,26 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           VAULT_ADDR: ${{ env.VAULT_ADDR }}
           VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
+
+      - name: Download Vault zip
+        uses: wei/wget@v1
+        with:
+          args: -O vault.zip https://releases.hashicorp.com/vault/${{ env.VAULT_VERSION }}/vault_${{ env.VAULT_VERSION }}_linux_amd64.zip
+
+      - name: Uncompress Vault zip
+        uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq vault.zip
       
+      - name: Enable required secret engines
+        run: |
+          export PATH=$(pwd):$PATH
+          vault secrets enable totp
+          vault secrets enable kv
+          vault secrets enable kv-v2
+        env:
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
+
       - name: Run tests
         run: echo "Passed all tests!"
