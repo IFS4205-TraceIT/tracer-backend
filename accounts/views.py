@@ -12,8 +12,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from accounts.hooks import post_login_hook, post_registration_hook
 
-from .models import AuthUser
-from infections.models import Contacttracers
 from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer,
