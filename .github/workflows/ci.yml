@@ -103,4 +103,5 @@ jobs:
           VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
 
       - name: Run tests
-        run: echo "Passed all tests!"
+        run: |
+          poetry run manage.py test
