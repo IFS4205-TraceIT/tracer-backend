@@ -2,6 +2,8 @@ name: Semgrep
 on:
   pull_request:
   push:
+    branches:
+      - main
 
   schedule:
     # Set to run everyday at 12am SGT = 4pm UTC
