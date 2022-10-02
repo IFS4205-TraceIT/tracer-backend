@@ -12,7 +12,7 @@ jobs:
     runs-on: ci
     container: 
       image: returntocorp/semgrep
-      options: --dns 1.1.1.1
+      options: --dns 8.8.8.8
 
     steps:
 
