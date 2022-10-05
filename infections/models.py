@@ -45,7 +45,7 @@ class Users(models.Model):
     name = models.TextField()
     dob = models.DateField()
     email = models.TextField(blank=True, null=True)
-    phone = models.IntegerField()
+    phone = models.TextField()
     gender = models.TextField()
     address = models.TextField()
     postal_code = models.TextField()
