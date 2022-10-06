@@ -8,14 +8,17 @@ class UserSerializer(serializers.ModelSerializer):
         model = Users
         fields = ['name','nric','gender','email','phone']
 
-class BuildingAccessSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=False)
-    class Meta:
-        model = Buildingaccess
-        fields = '__all__'
-
 class BuildingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Buildings
         fields = '__all__'
+
+class BuildingAccessSerializer(serializers.ModelSerializer):
+    user = UserSerializer(many=False)
+    building = BuildingSerializer(many=False)
+    class Meta:
+        model = Buildingaccess
+        fields = '__all__'
+
+
 
