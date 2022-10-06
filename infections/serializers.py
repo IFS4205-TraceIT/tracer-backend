@@ -54,6 +54,7 @@ class CloseContactsSerializer (serializers.ModelSerializer):
             'gender',
             'nric'
         )
+
 class UpdateUploadSerializer(serializers.ModelSerializer):
     due_date = serializers.DateField(default=date.today()+timedelta(days=7))
     start_date = serializers.DateField(default=date.today())

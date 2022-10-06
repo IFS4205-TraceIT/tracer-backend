@@ -1,11 +1,12 @@
 from django.shortcuts import render
-from .models import Users, Notifications
+from django.utils import timezone
+from .models import Infectionhistory, Users, Notifications
 from .serializers import (
     ListInfectedSerializer, 
     CloseContactsSerializer,
     UpdateUploadSerializer
 )
-from rest_framework.generics import ListAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.response import Response
 from datetime import date, timedelta, datetime
 from rest_framework import status
@@ -106,4 +107,16 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
 
         return Response(status=status.HTTP_200_OK)
 
-        
+class AddInfectionHistoryAPIView(CreateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def create(self, request):
+        if 'nrics' not in request.data or type(request.data['nrics']) != list:
+            raise ValidationError(detail="Invalid Request!")
+        nrics = set(request.data['nrics'])
+        query_set = Users.objects.filter(nric__in=nrics)
+        if query_set.count() == 0:
+            return Response(status=status.HTTP_201_CREATED)
+        Infectionhistory.objects.bulk_create([Infectionhistory(recorded_timestamp=timezone.now(), user=user) for user in query_set])
+        return Response(status=status.HTTP_201_CREATED)
