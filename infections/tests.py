@@ -93,6 +93,41 @@ class InfectionsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Notifications.objects.count(), 1)
 
+    def test_add_infection_history_invalid(self):
+
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post('/api/infections/add')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.post('/api/infections/add', {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.post('/api/infections/add', {'nrics': 'asdasd'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.post('/api/infections/add', {'nrics': []}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Infectionhistory.objects.count(), 1)
+        
+        response = self.client.post('/api/infections/add', {'nrics': ['wrong']}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Infectionhistory.objects.count(), 1)
+    
+    def test_add_infection_history_valid(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post('/api/infections/add', {'nrics': ['S1234567A']}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Infectionhistory.objects.count(), 2)
+
+        response = self.client.post('/api/infections/add', {'nrics': ['S1234567A', 'S1234568A']}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Infectionhistory.objects.count(), 4)
+        
+        response = self.client.post('/api/infections/add', {'nrics': ['S1234567A', 'S1234568A', 'wrong']}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Infectionhistory.objects.count(), 6)
 
 
 
