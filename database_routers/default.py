@@ -3,7 +3,7 @@ class DefaultRouter:
     A router to control all database operations on models in the
     auth and contenttypes applications.
     """
-    route_app_labels = {'researchs','main'}
+    route_app_labels = {'buildings', 'infections'}
 
     def db_for_read(self, model, **hints):
         if model._meta.app_label not in self.route_app_labels:
