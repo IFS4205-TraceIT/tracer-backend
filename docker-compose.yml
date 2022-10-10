@@ -11,6 +11,8 @@ services:
       POSTGRES_DB: test
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
+    volumes:
+      - './init_dev.sql:/docker-entrypoint-initdb.d/init_dev.sql'
 
   vault:
     image: vault
