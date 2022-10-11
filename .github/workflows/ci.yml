@@ -16,7 +16,20 @@ jobs:
     container: python:3.10-slim
 
     services:
-      database:
+      database_auth:
+        image: postgres
+        env:
+          POSTGRES_DB: "traceit"
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        
+        options: >-
+          --health-cmd pg_isready 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+      
+      database_main:
         image: postgres
         env:
           POSTGRES_DB: "traceit"
@@ -74,12 +87,12 @@ jobs:
         env:
           DJANGO_DEBUG: ${{ env.DJANGO_DEBUG }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-          POSTGRES_HOST: "database"
+          POSTGRES_HOST: "database_main"
           POSTGRES_PORT: "5432"
           POSTGRES_DB: "traceit"
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_AUTH_HOST: "database"
+          POSTGRES_AUTH_HOST: "database_auth"
           POSTGRES_AUTH_PORT: "5432"
           POSTGRES_AUTH_DB: "traceit"
           POSTGRES_AUTH_USER: ${{ secrets.POSTGRES_USER }}
