@@ -69,8 +69,8 @@ jobs:
 
       - name: Migrate Database
         run: |
-          poetry run python manage.py migrate --database main_db --check
-          poetry run python manage.py migrate --check
+          poetry run python manage.py migrate
+          poetry run python manage.py migrate --database main_db
         env:
           DJANGO_DEBUG: ${{ env.DJANGO_DEBUG }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
