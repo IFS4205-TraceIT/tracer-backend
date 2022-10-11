@@ -69,6 +69,7 @@ jobs:
 
       - name: Migrate Database
         run: |
+          poetry run python manage.py makemigrations --database main_db
           poetry run python manage.py makemigrations
           poetry run python manage.py migrate
         env:
@@ -79,6 +80,11 @@ jobs:
           POSTGRES_DB: "traceit"
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_AUTH_HOST: "database"
+          POSTGRES_AUTH_PORT: "5432"
+          POSTGRES_AUTH_DB: "traceit"
+          POSTGRES_AUTH_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_AUTH_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           VAULT_ADDR: ${{ env.VAULT_ADDR }}
           VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
 
@@ -113,5 +119,10 @@ jobs:
           POSTGRES_DB: "traceit"
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_AUTH_HOST: "database"
+          POSTGRES_AUTH_PORT: "5432"
+          POSTGRES_AUTH_DB: "traceit"
+          POSTGRES_AUTH_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_AUTH_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           VAULT_ADDR: ${{ env.VAULT_ADDR }}
           VAULT_TOKEN: ${{ secrets.VAULT_ROOT_TOKEN }}
