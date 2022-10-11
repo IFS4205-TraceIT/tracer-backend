@@ -69,6 +69,7 @@ jobs:
 
       - name: Migrate Database
         run: |
+          poetry run python manage.py makemigrations
           poetry run python manage.py migrate --database main_db
           poetry run python manage.py migrate
         env:
