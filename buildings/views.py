@@ -1,4 +1,4 @@
-from .models import Buildings,Buildingaccess
+from .models import Buildings,Buildingaccess, Users
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -35,4 +35,32 @@ class ListBuildingAccess (ListAPIView):
             raise ValidationError(detail="Invalid Building!")
 
         result = Buildingaccess.objects.filter(building = building, access_timestamp__range=(querydate,querydate+timedelta(hours=23,minutes=59)))
+        return result
+
+class ListBuildingUserAccess (ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = BuildingAccessSerializer
+    lookup_url_kwarg = ["userid","date"]
+
+    def get_queryset(self):
+        id = self.kwargs.get(self.lookup_url_kwarg[0])
+        if id is None:
+            return None
+        querydate = self.kwargs.get(self.lookup_url_kwarg[1], None)
+
+        try:
+            user = Users.objects.get(nric = id)
+        except Users.DoesNotExist:
+            return None
+
+        result = Buildingaccess.objects.filter(user = user)
+
+        if querydate is None:
+            return result
+        else:
+            try:
+                querydate =  datetime.strptime(querydate,"%Y-%m-%d")
+                result = result.filter(access_timestamp__range=(querydate,querydate+timedelta(hours=23,minutes=59)))
+            except ValueError:
+                return None
         return result
