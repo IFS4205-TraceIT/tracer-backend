@@ -14,6 +14,7 @@ import uuid
 # Create your tests here.
 
 class InfectionsTestCase(APITestCase):
+    databases = {'default', 'main_db'}
     def setUp(self):
         self.user = AuthUser.objects.create_superuser(username='test', email='test@test.com',password='test')
 

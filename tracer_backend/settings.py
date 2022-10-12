@@ -23,16 +23,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = (os.environ.get('DJANGO_DEBUG') == "True")
+
 # Vault client connection and initialization settings.
 # See https://hvac.readthedocs.io/en/stable/source/hvac_v1.html#hvac.v1.Client.__init__
 VAULT_SETTINGS = {
     'url': os.environ['VAULT_ADDR'],
     'token': os.environ['VAULT_TOKEN'],
-    'verify': False
+    'verify': False if DEBUG else os.environ.get('VAULT_ROOT_CA_FILE'),
+    'cert': None if DEBUG else (os.environ.get('VAULT_CLIENT_CERT_FILE'), os.environ.get('VAULT_CLIENT_KEY_FILE')),
 }
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = (os.environ.get('DJANGO_DEBUG') == "True")
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
@@ -93,13 +94,36 @@ WSGI_APPLICATION = 'tracer_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'HOST': os.environ['POSTGRES_AUTH_HOST'],
+        'PORT': os.environ['POSTGRES_AUTH_PORT'],
+        'NAME': os.environ['POSTGRES_AUTH_DB'],
+        'USER': os.environ['POSTGRES_AUTH_USER'],
+        'PASSWORD': os.environ['POSTGRES_AUTH_PASSWORD'],
+        'OPTIONS': {} if DEBUG else {
+            'sslmode': 'verify-ca',
+            'sslcert': os.environ['POSTGRES_AUTH_SSL_CERT'],
+            'sslkey': os.environ['POSTGRES_AUTH_SSL_KEY'],
+            'sslrootcert': os.environ['POSTGRES_AUTH_SSL_ROOT_CERT'],
+        },
+    },
+    'main_db': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'HOST': os.environ['POSTGRES_HOST'],
         'PORT': os.environ['POSTGRES_PORT'],
         'NAME': os.environ['POSTGRES_DB'],
         'USER': os.environ['POSTGRES_USER'],
         'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+        'OPTIONS': {} if DEBUG else {
+            'sslmode': 'verify-ca',
+            'sslcert': os.environ['POSTGRES_SSL_CERT'],
+            'sslkey': os.environ['POSTGRES_SSL_KEY'],
+            'sslrootcert': os.environ['POSTGRES_SSL_ROOT_CERT'],
+        },
     }
 }
+
+#'database_routers.main.MainRouter'
+DATABASE_ROUTERS = ['database_routers.default.DefaultRouter','database_routers.main.MainRouter']
 
 
 # DEFAULT USER MODEL

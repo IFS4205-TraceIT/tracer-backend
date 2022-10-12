@@ -22,10 +22,22 @@
         VAULT_ADDR="http://127.0.0.1:8200" \
         VAULT_TOKEN="dev-only-token" \
         POSTGRES_HOST="127.0.0.1" \
+        POSTGRES_AUTH_HOST="127.0.0.1" \
+        POSTGRES_RESEARCH_HOST="127.0.0.1" \
         POSTGRES_PORT="5432" \
-        POSTGRES_DB="test" \
+        POSTGRES_AUTH_PORT="5432" \
+        POSTGRES_RESEARCH_PORT="5432" \
+        POSTGRES_DB="test1" \
+        POSTGRES_RESEARCH_DB="test2" \
+        POSTGRES_AUTH_DB="test3" \
         POSTGRES_USER="test" \
-        POSTGRES_PASSWORD="test"
+        POSTGRES_RESEARCH_USER="test" \
+        POSTGRES_AUTH_USER="test" \
+        POSTGRES_PASSWORD="test" \
+        POSTGRES_RESEARCH_PASSWORD="test" \
+        POSTGRES_AUTH_PASSWORD="test" \
+        POSTGRES_SUPER_USER="test" \
+        POSTGRES_SUPER_PASSWORD="test"
     ```
 
 5. Run `poetry run python manage.py makemigrations` and `poetry run python manage.py migrate` to migrate the database.

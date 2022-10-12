@@ -1,5 +1,6 @@
 from django.db import models
 from infections.models import Users
+import uuid
 
 # Create your models here.
 class Buildingaccess(models.Model):
@@ -13,6 +14,7 @@ class Buildingaccess(models.Model):
 
 
 class Buildings(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.TextField()
     location = models.IntegerField()
 
