@@ -50,7 +50,7 @@ class ListBuildingUserAccess (ListAPIView):
 
         try:
             user = Users.objects.get(nric = id)
-        except Users.DoesNotExist:
+        except:
             return None
 
         result = Buildingaccess.objects.filter(user = user)
