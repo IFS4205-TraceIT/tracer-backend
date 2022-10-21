@@ -31,7 +31,7 @@ class ListBuildingAccess (ListAPIView):
                 raise ValidationError(detail="Invalid Date format, yyyy-mm-dd")
         try:
             building = Buildings.objects.get(id = id)
-        except Buildings.DoesNotExist:
+        except:
             raise ValidationError(detail="Invalid Building!")
 
         result = Buildingaccess.objects.filter(building = building, access_timestamp__range=(querydate,querydate+timedelta(hours=23,minutes=59)))
