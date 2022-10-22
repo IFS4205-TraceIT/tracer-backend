@@ -1,4 +1,4 @@
-# tracer-backend [![Tracer Backend CI](https://github.com/IFS4205-TraceIT/tracer-backend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/IFS4205-TraceIT/tracer-backend/actions/workflows/ci.yml) [![Semgrep](https://github.com/IFS4205-TraceIT/tracer-backend/actions/workflows/semgrep.yml/badge.svg?branch=main)](https://github.com/IFS4205-TraceIT/tracer-backend/actions/workflows/semgrep.yml)
+# tracer-backend [![Tracer Backend CI](https://github.com/IFS4205-TraceIT/tracer-backend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/IFS4205-TraceIT/tracer-backend/actions/workflows/ci.yml) [![SAST](https://github.com/IFS4205-TraceIT/tracer-backend/actions/workflows/sast.yml/badge.svg?branch=main)](https://github.com/IFS4205-TraceIT/tracer-backend/actions/workflows/sast.yml)
 
 ## Setting up for local development
 
