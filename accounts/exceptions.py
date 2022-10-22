@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
 import logging
-logger = logging.Logger(__name__)
+logger = logging.getLogger('loki')
 
 def core_exception_handler(exc: Exception, context: dict[str, Any]) -> Optional[Response]:
     """Error handler for the API."""

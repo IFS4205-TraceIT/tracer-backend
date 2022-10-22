@@ -9,7 +9,7 @@ from .serializers import UserSerializer
 from infections.models import Contacttracers
 
 import logging
-logger = logging.Logger(__name__)
+logger = logging.getLogger('loki')
 
 def post_registration_hook(request: Request, serializer: UserSerializer):
     """

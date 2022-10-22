@@ -7,7 +7,7 @@ from datetime import date, timedelta, datetime
 from .serializers import BuildingSerializer, BuildingAccessSerializer
 
 import logging
-logger = logging.Logger(__name__)
+logger = logging.getLogger('loki')
 
 # Create your views here.
 

@@ -15,7 +15,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 import logging
-logger = logging.Logger(__name__)
+logger = logging.getLogger('loki')
 
 
 class ListInfectionAPIView(ListAPIView):

@@ -25,7 +25,7 @@ from .vault import create_vault_client
 from .vault.totp import TOTP
 
 import logging
-logger = logging.Logger(__name__)
+logger = logging.getLogger('loki')
 
 class RegistrationAPIView(APIView):
     permission_classes = (AllowAny,)
