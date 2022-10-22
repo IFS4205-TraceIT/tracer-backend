@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from datetime import date, timedelta, datetime
 from .serializers import BuildingSerializer, BuildingAccessSerializer
 
+import logging
+logger = logging.Logger(__name__)
 
 # Create your views here.
 
@@ -35,6 +37,7 @@ class ListBuildingAccess (ListAPIView):
             raise ValidationError(detail="Invalid Building!")
 
         result = Buildingaccess.objects.filter(building = building, access_timestamp__range=(querydate,querydate+timedelta(hours=23,minutes=59)))
+        logger.info('Building access request.', extra={'action': 'list_building_access', 'request': self.request, 'building_id': id, 'user_id': self.request.user.id})
         return result
 
 class ListBuildingUserAccess (ListAPIView):
@@ -43,6 +46,7 @@ class ListBuildingUserAccess (ListAPIView):
     lookup_url_kwarg = ["userid","date"]
 
     def get_queryset(self):
+        logger.info('List user building access request.', extra={'action': 'list_building_user_access', 'request': self.request, 'user_id': self.request.user.id})
         id = self.kwargs.get(self.lookup_url_kwarg[0])
         if id is None:
             return None
@@ -63,4 +67,5 @@ class ListBuildingUserAccess (ListAPIView):
                 result = result.filter(access_timestamp__range=(querydate,querydate+timedelta(hours=23,minutes=59)))
             except ValueError:
                 return None
+        
         return result
