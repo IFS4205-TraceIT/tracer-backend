@@ -191,3 +191,37 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'json': {
+            'format': '%(asctime)s %(message)s',
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+        },
+        'loki': {
+            'level': 'INFO',
+            'class': 'logging_loki.LokiHandler',
+            'url': 'https://logs-prod-011.grafana.net/loki/api/v1/push',
+            'tags': {'app': 'tracer-backend'},
+            'auth': ('308685', os.environ['LOKI_PASSWD']),
+            'version': '1',
+            'formatter': 'json',
+        },
+    },
+    'loggers': {
+        'loki': {
+            'handlers': ['console'] if DEBUG else ['console', 'loki'],
+            'level': 'INFO',
+            'propagate': False,
+        }
+    }
+}
