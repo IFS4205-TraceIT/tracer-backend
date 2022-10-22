@@ -212,7 +212,7 @@ LOGGING = {
             'class': 'logging_loki.LokiHandler',
             'url': 'https://logs-prod-011.grafana.net/loki/api/v1/push',
             'tags': {'app': 'tracer-backend'},
-            'auth': ('308685', os.environ['LOKI_PASSWD']),
+            'auth': ('', '') if DEBUG else ('308685', os.environ['LOKI_PASSWD']),
             'version': '1',
             'formatter': 'json',
         },
