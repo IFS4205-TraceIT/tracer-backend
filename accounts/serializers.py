@@ -64,7 +64,7 @@ class LoginSerializer(serializers.ModelSerializer[AuthUser]):
         """Get user token."""
         user = AuthUser.objects.get(username=obj.username)
 
-        return {'refresh': user.tokens['refresh'], 'access': user.tokens['access']}
+        return {'refresh': 'unused', 'access': user.tokens['access']}
 
     class Meta:
         model = AuthUser

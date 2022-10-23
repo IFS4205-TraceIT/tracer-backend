@@ -14,6 +14,8 @@ from django.http import Http404
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+import logging
+logger = logging.getLogger('loki')
 
 
 class ListInfectionAPIView(ListAPIView):
@@ -24,6 +26,7 @@ class ListInfectionAPIView(ListAPIView):
     lookup_url_kwarg = "date"
 
     def get_queryset(self):
+        logger.info('List infection request.', extra={'action': 'list_infection', 'request': self.request, 'user_id': self.request.user.id})
         querydate = self.kwargs.get(self.lookup_url_kwarg, None)
         if querydate is None:
             querydate = date.today()
@@ -63,6 +66,7 @@ class ListCloseContactAPIView(ListAPIView):
     lookup_url_kwarg = "infectedId"
 
     def get_queryset(self):
+        logger.info('List close contact request.', extra={'action': 'list_close_contact', 'request': self.request, 'user_id': self.request.user.id})
         try:
             uid = self.kwargs.get(self.lookup_url_kwarg)
             infectionId = self.kwargs.get("infectionId")
@@ -89,7 +93,7 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
             return None, cur_infection
 
     def update(self, request, pk, infectionId):
-
+        logger.info('Update upload status request.', extra={'action': 'update_upload_status', 'request': self.request, 'user_id': self.request.user.id})
         contact_tracer_id = request.user.id
         cur_notification, infection_id =  self.get_object(pk, infectionId)
         if cur_notification is None:
@@ -112,6 +116,7 @@ class AddInfectionHistoryAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def create(self, request):
+        logger.info('Add infection history request.', extra={'action': 'add_infection_history', 'request': self.request, 'user_id': self.request.user.id})
         if 'nrics' not in request.data or type(request.data['nrics']) != list:
             raise ValidationError(detail="Invalid Request!")
         nrics = set(request.data['nrics'])
