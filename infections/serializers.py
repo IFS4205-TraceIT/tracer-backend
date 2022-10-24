@@ -41,6 +41,7 @@ class CloseContactsSerializer (serializers.ModelSerializer):
     email = serializers.CharField(source="contacted_user.email", read_only=True)
     gender = serializers.CharField(source="contacted_user.gender", read_only=True)
     nric = serializers.CharField(source="contacted_user.nric", read_only=True)
+    rssi = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Closecontacts
