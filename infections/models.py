@@ -44,7 +44,7 @@ class Users(models.Model):
     nric = models.TextField(unique=True)
     name = models.TextField()
     dob = models.DateField()
-    email = models.TextField(blank=True, null=True)
+    email = models.TextField(blank=True)
     phone = models.TextField()
     gender = models.TextField()
     address = models.TextField()

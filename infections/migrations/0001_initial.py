@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('nric', models.TextField(unique=True)),
                 ('name', models.TextField()),
                 ('dob', models.DateField()),
-                ('email', models.TextField(blank=True, null=True)),
+                ('email', models.TextField(blank=True)),
                 ('phone', models.IntegerField()),
                 ('gender', models.TextField()),
                 ('address', models.TextField()),
