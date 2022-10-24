@@ -1,12 +1,18 @@
 from .models import Buildings,Buildingaccess, Users
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from datetime import date, timedelta, datetime
 from django.utils import timezone
 from .serializers import BuildingSerializer, BuildingAccessSerializer
 
+import qrcode
+import io
+import base64   
 import logging
 logger = logging.getLogger('loki')
 
@@ -70,3 +76,22 @@ class ListBuildingUserAccess (ListAPIView):
                 return None
         
         return result
+
+class GenerateQRCodeView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            building = Buildings.objects.get(name=kwargs['name'])
+        except Buildings.DoesNotExist:
+            raise ValidationError(detail="Building does not exist")
+        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+        qr.add_data(building.id)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        tmp = io.BytesIO()
+        img_save = img.save(tmp)
+        png_qr = tmp.getvalue()
+        b64_img = base64.b64encode(png_qr)
+        logger.info('Generated Building QR code.', extra={'action': 'generate_building_qr_code', 'request': request, 'building_id': building.id})
+        return Response(data={"qrcode": b64_img}, status=status.HTTP_200_OK)
