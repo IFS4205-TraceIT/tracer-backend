@@ -4,9 +4,8 @@ from .models import (
     Infectionhistory,
     Notifications
     )
-from django.utils import timezone
+
 from rest_framework import exceptions, serializers 
-from datetime import date, timedelta
 
 class NotificationsSerializer(serializers.ModelSerializer):
 
@@ -57,8 +56,6 @@ class CloseContactsSerializer (serializers.ModelSerializer):
         )
 
 class UpdateUploadSerializer(serializers.ModelSerializer):
-    due_date = serializers.DateField(default=timezone.now().date()+timedelta(days=7))
-    start_date = serializers.DateField(default=timezone.now().date())
 
     class Meta:
         model = Notifications
