@@ -8,7 +8,7 @@ from .serializers import (
 )
 from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.response import Response
-from datetime import date, timedelta, datetime
+from datetime import timedelta, datetime
 from rest_framework import status
 from django.http import Http404
 from rest_framework.exceptions import ValidationError
@@ -29,10 +29,10 @@ class ListInfectionAPIView(ListAPIView):
         logger.info('List infection request.', extra={'action': 'list_infection', 'request': self.request, 'user_id': self.request.user.id})
         querydate = self.kwargs.get(self.lookup_url_kwarg, None)
         if querydate is None:
-            querydate = date.today()
+            querydate = timezone.now()
         else:
             try:
-                querydate =  datetime.strptime(querydate,"%Y-%m-%d")
+                querydate =  datetime.strptime(querydate,"%Y-%m-%d").astimezone(timezone.now().tzinfo)
             except ValueError:
                 raise ValidationError(detail="Invalid Date format, yyyy-mm-dd")
 
