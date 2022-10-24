@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import exceptions, serializers
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
@@ -38,6 +39,11 @@ class RegistrationSerializer(serializers.ModelSerializer[AuthUser]):
         else:
             value = '@'.join([email_name, domain_part.lower()])
 
+        return value
+
+    def validate_password(self, value: str) -> str:
+        """Validate password."""
+        validate_password(value)
         return value
 
     def create(self, validated_data):  # type: ignore
@@ -117,6 +123,7 @@ class UserSerializer(serializers.ModelSerializer[AuthUser]):
             setattr(instance, key, value)
 
         if password is not None:
+            validate_password(password, user=instance)
             instance.set_password(password)
 
         instance.save()

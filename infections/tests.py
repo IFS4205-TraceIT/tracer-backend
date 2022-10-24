@@ -16,7 +16,7 @@ import uuid
 class InfectionsTestCase(APITestCase):
     databases = {'default', 'main_db'}
     def setUp(self):
-        self.user = AuthUser.objects.create_superuser(username='test', email='test@test.com',password='test')
+        self.user = AuthUser.objects.create_superuser(username='test', email='test@test.com',password='1qwer$#@!')
 
         Contacttracers(id=self.user.id).save()
 

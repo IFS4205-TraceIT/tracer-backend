@@ -4,6 +4,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from datetime import date, timedelta, datetime
+from django.utils import timezone
 from .serializers import BuildingSerializer, BuildingAccessSerializer
 
 import logging
@@ -25,10 +26,10 @@ class ListBuildingAccess (ListAPIView):
         id = self.kwargs.get(self.lookup_url_kwarg[0])
         querydate = self.kwargs.get(self.lookup_url_kwarg[1], None)
         if querydate is None:
-            querydate = datetime.combine(date.today(), datetime.min.time())
+            querydate = datetime.combine(date.today(), datetime.min.time(), timezone.now().tzinfo)
         else:
             try:
-                querydate =  datetime.strptime(querydate,"%Y-%m-%d")
+                querydate =  datetime.strptime(querydate,"%Y-%m-%d").astimezone(timezone.now().tzinfo)
             except ValueError:
                 raise ValidationError(detail="Invalid Date format, yyyy-mm-dd")
         try:
@@ -63,7 +64,7 @@ class ListBuildingUserAccess (ListAPIView):
             return result
         else:
             try:
-                querydate =  datetime.strptime(querydate,"%Y-%m-%d")
+                querydate =  datetime.strptime(querydate,"%Y-%m-%d").astimezone(timezone.now().tzinfo)
                 result = result.filter(access_timestamp__range=(querydate,querydate+timedelta(hours=23,minutes=59)))
             except ValueError:
                 return None
