@@ -100,7 +100,9 @@ class UpdateUploadStatusAPIView(UpdateAPIView):
             serial = self.serializer_class(data={
                 'infection': infection_id.id,
                 'tracer':contact_tracer_id,     
-                'uploaded_status': False
+                'uploaded_status': False,
+                'due_date': timezone.now().date()+timedelta(days=7),
+                'start_date': timezone.now().date()
             })
             serial.is_valid(raise_exception=True)
             serial.save()
