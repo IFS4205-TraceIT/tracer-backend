@@ -6,6 +6,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+from django.contrib.auth.password_validation import validate_password
 from django.db import models
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -25,6 +26,7 @@ class UserManager(BaseUserManager):  # type: ignore
             raise TypeError('Superusers must have a password.')
 
         user = self.model(username=username, email=self.normalize_email(email))
+        validate_password(password, user=user)
         user.set_password(password)
         user.save()
 
