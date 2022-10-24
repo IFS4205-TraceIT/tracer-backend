@@ -52,7 +52,8 @@ class CloseContactsSerializer (serializers.ModelSerializer):
             'phone',
             'email',
             'gender',
-            'nric'
+            'nric',
+            'rssi'
         )
 
 class UpdateUploadSerializer(serializers.ModelSerializer):
