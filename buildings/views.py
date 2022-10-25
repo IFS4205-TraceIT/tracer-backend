@@ -54,7 +54,7 @@ class ListBuildingUserAccess (ListAPIView):
 
     def get_queryset(self):
         logger.info('List user building access request.', extra={'action': 'list_building_user_access', 'request': self.request, 'user_id': self.request.user.id})
-        id = self.kwargs.get(self.lookup_url_kwarg[0])
+        id = self.kwargs.get(self.lookup_url_kwarg[0], None)
         if id is None:
             return None
         querydate = self.kwargs.get(self.lookup_url_kwarg[1], None)
