@@ -10,7 +10,6 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.response import Response
 from datetime import timedelta, datetime
 from rest_framework import status
-from django.http import Http404
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
