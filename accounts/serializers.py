@@ -111,7 +111,7 @@ class UserSerializer(serializers.ModelSerializer[AuthUser]):
             'phone_number',
             'has_otp'
         )
-        read_only_fields = ('has_otp')
+        read_only_fields = ('has_otp',)
 
     def update(self, instance, validated_data):  # type: ignore
         """Perform an update on a User."""
