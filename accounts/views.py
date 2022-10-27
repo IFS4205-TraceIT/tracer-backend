@@ -71,16 +71,17 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
     def update(self, request: Request, *args: dict[str, Any], **kwargs: dict[str, Any]) -> Response:
         """Return updated user."""
-        logger.info('User update request.', extra={'action': 'update', 'request': request, 'user_id': request.user.id})
-        serializer_data = request.data
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        # logger.info('User update request.', extra={'action': 'update', 'request': request, 'user_id': request.user.id})
+        # serializer_data = request.data
 
-        serializer = self.serializer_class(
-            request.user, data=serializer_data, partial=True, context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        logger.info('User updated.', extra={'action': 'user_update', 'request': request, 'user_id': request.user.id})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # serializer = self.serializer_class(
+        #     request.user, data=serializer_data, partial=True, context={'request': request}
+        # )
+        # serializer.is_valid(raise_exception=True)
+        # serializer.save()
+        # logger.info('User updated.', extra={'action': 'user_update', 'request': request, 'user_id': request.user.id})
+        # return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class LogoutAPIView(APIView):
